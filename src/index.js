@@ -68,8 +68,6 @@ async function getAllTopBooks() {
   const bookslist = await topBooks.map(book => book.books[0]);
   // console.log(bookslist);
   const bookList2 = bookslist.map(bookList).join(' ');
-  // console.log(bookList2);
-
   boot.insertAdjacentHTML('beforeend', bookList2);
 }
 
