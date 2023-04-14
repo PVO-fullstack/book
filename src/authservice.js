@@ -118,17 +118,12 @@ export async function onLogin1() {
           localStorage.setItem('list', null);
           return;
         }
-        // console.log(shoppingList);
         const qwe = Object.keys(shoppingList);
-        // console.log(qwe);
-        // const keys = Object.key(qwe);
         const list = [];
         for (const key of qwe) {
           list.push(shoppingList[key]);
-          // console.log(list);
         }
         list.map(el => {
-          // console.log(el);
           const listJson = JSON.stringify(el);
           localStorage.setItem('list', listJson);
         });
