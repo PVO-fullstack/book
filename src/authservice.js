@@ -104,8 +104,10 @@ export async function onLogin1() {
   const authSign = getAuth();
   signInWithEmailAndPassword(authSign, email, password)
     .then(userCredential => {
-      userUid = userCredential.user.uid;
-      idToken = userCredential.user.accessToken;
+      const userUid = userCredential.user.uid;
+      const idToken = userCredential.user.accessToken;
+      console.log(userUid);
+
       // const idTokenJson = JSON.stringify(idToken);
       // const uidJson = JSON.stringify(userUid);
       localStorage.setItem('token', JSON.stringify(idToken));
