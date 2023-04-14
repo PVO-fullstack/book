@@ -106,10 +106,10 @@ export async function onLogin1() {
     .then(userCredential => {
       userUid = userCredential.user.uid;
       idToken = userCredential.user.accessToken;
-      const idTokenJson = JSON.stringify(idToken);
-      const uidJson = JSON.stringify(userUid);
-      localStorage.setItem('token', idTokenJson);
-      localStorage.setItem('uid', uidJson);
+      // const idTokenJson = JSON.stringify(idToken);
+      // const uidJson = JSON.stringify(userUid);
+      localStorage.setItem('token', JSON.stringify(idToken));
+      localStorage.setItem('uid', JSON.stringify(userUid));
       const displayName = userCredential.user.displayName;
       getShoppingList().then(shoppingList => {
         console.log(shoppingList);
