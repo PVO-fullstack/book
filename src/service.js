@@ -14,6 +14,7 @@ export const getBookById = async id => {
     const response = await axios.get(
       `https://books-backend.p.goit.global/books/${id}`
     );
+    // console.log(response.data);
     return response.data;
   } catch (error) {
     console.log(error);

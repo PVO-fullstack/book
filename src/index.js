@@ -1,8 +1,8 @@
 import { getTopBooks, getBookById } from './service';
 import {
   deleteBookShoping,
-  getShopingList,
-  postTopBooks,
+  getShoppingList,
+  postShoppingList,
 } from './servisFirebase';
 import { createUser, onLogOut, onLogin1, onLogin2 } from './authservice';
 
@@ -35,19 +35,28 @@ modalBtn.addEventListener('click', modalClose);
 
 boot.addEventListener('click', onBookClick);
 
-let book = {};
+localStorage.removeItem('token');
 
 async function deleteBook(e) {
-  const key = e.target.attributes.data_key.value;
-  await deleteBookShoping(key);
-  root.innerHTML = '';
-  getBooks();
+  const id = e.target.attributes.data_id.value;
+  const books = JSON.parse(localStorage.getItem('list'));
+  console.log(books);
+  filteredBooks = books.filter(book => book._id !== id);
+  console.log(filteredBooks);
+  localStorage.setItem('list', JSON.stringify(filteredBooks));
+  getLocalList();
+  // await deleteBookShoping(key);
+  // getBooks();
 }
+
+let book = {};
+let id = null;
 
 async function onBookClick(e) {
   mo.innerHTML = '';
-  const id = e.target.attributes.data_id.value;
+  id = e.target.attributes.data_id.value;
   book = await getBookById(id);
+  // console.log(book);
   modalOpen();
   mo.insertAdjacentHTML(
     'beforeend',
@@ -59,14 +68,37 @@ async function onBookClick(e) {
 }
 
 function addToList() {
-  postTopBooks(book);
+  const bookList = JSON.parse(localStorage.getItem('list'));
+  // console.log(bookList);
+  let modernList = [];
+  // console.log(book);
+  // if (!bookList) {
+  //   modernList.push(book);
+  //   console.log(modernList);
+  // }
+
+  if (bookList) {
+    // console.log(book._id);
+    // console.log(id);
+    const uniqBook = bookList.some(book => book._id === id);
+    console.log(uniqBook);
+    if (uniqBook) {
+      modalClose();
+      return;
+    }
+    modernList = [...bookList, book];
+  } else if (modernList.length === 0) {
+    console.log(book);
+    modernList.push(book);
+  }
+  console.log(modernList);
+  localStorage.setItem('list', JSON.stringify(modernList));
   modalClose();
 }
 
 async function getAllTopBooks() {
   const topBooks = await getTopBooks();
   const bookslist = await topBooks.map(book => book.books[0]);
-  // console.log(bookslist);
   const bookList2 = bookslist.map(bookList).join(' ');
   boot.insertAdjacentHTML('beforeend', bookList2);
 }
@@ -93,8 +125,29 @@ function onLoginUser2() {
   onLogin2();
 }
 
-function onLogOutUser() {
+async function onLogOutUser() {
+  await deleteBookShoping();
+  const localList = JSON.parse(localStorage.getItem('list'));
+  console.log(localList);
+  // const list = localList.join(',');
+  // console.log(keys);
+  // const list = [];
+  // for (const key of keys) {
+  //   list = [...localList[key]];
+  // list.push(localList[key]);
+  // console.log(list);
+  // }
+  postShoppingList(localList);
+
   onLogOut();
+  // const keys = Object.value(localList);
+  // const list = [];
+  // for (const key of keys) {
+  //   list.push(localList[key]);
+  //   console.log(keys);
+  // }
+  // const listJson = JSON.stringify(list);
+  // localStorage.setItem('list', listJson);
 }
 
 function modalOpen() {
@@ -106,7 +159,7 @@ function modalClose() {
 }
 
 function addBookShoppingList() {
-  postTopBooks(id);
+  postShoppingList(id);
 }
 
 // changeName.addEventListener('click', addBookShoppingList);
@@ -114,7 +167,7 @@ function addBookShoppingList() {
 async function getBooks() {
   const allBooks = [];
   root.innerHTML = '';
-  const bokks = await getShopingList();
+  const bokks = await getShoppingList();
   if (bokks === null) {
     return alert('No more book');
   }
@@ -123,22 +176,23 @@ async function getBooks() {
   for (const key of keys) {
     allBooks.push({ ...bokks[key], key });
   }
-  const list = allBooks.map(bookList).join(' ');
-  // console.log(allBooks);
-  root.insertAdjacentHTML('beforeend', list);
+  // const list = allBooks.map(bookList).join(' ');
+  // // console.log(allBooks);
+  // root.insertAdjacentHTML('beforeend', list);
 }
 
-getData.addEventListener('click', getBooks);
+getData.addEventListener('click', getLocalList);
 
-// const too = ({ title }) => {
-//   return `
-//   <div>
-//   <img width=128px data=${_id} src=${book_image} alt="">
-//   <p>${author}</p>
-//   <p>${title}</p>
-//   </div>
-//   `;
-// };
+function getLocalList() {
+  const localList = JSON.parse(localStorage.getItem('list'));
+  if (!localList) {
+    return alert('No more book');
+  }
+  // let bbookk = [];
+  const list = localList.map(bookList).join(' ');
+  root.innerHTML = '';
+  root.insertAdjacentHTML('beforeend', list);
+}
 
 const bookList = ({ key, book_image, author, title, _id }) => {
   return `

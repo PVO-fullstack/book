@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
+import { getShoppingList } from './servisFirebase';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCq9mOndO3g-rUoq_LhFsLf4QY5_4L9fkc',
@@ -24,12 +25,6 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const root = document.querySelector('.root');
 
-// const email = 'PVO@email.com';
-// const password = 'mypassword';
-
-// let displayName = '';
-const uName = 'Vova';
-
 export function createUser(userEmail, userPassword, displayName) {
   const authCreate = getAuth();
   createUserWithEmailAndPassword(
@@ -39,13 +34,13 @@ export function createUser(userEmail, userPassword, displayName) {
     displayName
   )
     .then(userCredential => {
-      uidQ = userCredential.user.uid;
-      const uidJ = JSON.stringify(uidQ);
-      localStorage.setItem('uid', uidJ);
-      return root.insertAdjacentHTML(
-        'beforeend',
-        `<p style="margin: 0; background-color: chartreuse">Welcome, ${displayName}</p>`
-      );
+      userUid = userCredential.user.uid;
+      idToken = userCredential.user.accessToken;
+      const idTokenJson = JSON.stringify(idToken);
+      const uidJson = JSON.stringify(userUid);
+      localStorage.setItem('token', idTokenJson);
+      localStorage.setItem('uid', uidJson);
+      return root.insertAdjacentHTML('beforeend', userIn(displayName));
     })
     .catch(error => {
       const errorCode = error.code;
@@ -54,24 +49,94 @@ export function createUser(userEmail, userPassword, displayName) {
     });
 }
 
-let uidQ = null;
+export function onLogin(email, password) {
+  const authSign = getAuth();
+  signInWithEmailAndPassword(authSign, email, password)
+    .then(userCredential => {
+      userUid = userCredential.user.uid;
+      idToken = userCredential.user.accessToken;
+      // const idTokenJson = JSON.stringify(idToken);
+      // const uidJson = JSON.stringify(userUid);
+      localStorage.setItem('token', JSON.stringify(idToken));
+      localStorage.setItem('uid', JSON.stringify(userUid));
+      const displayName = userCredential.user.displayName;
+      getShoppingList().then(shoppingList => {
+        console.log(shoppingList);
+        if (shoppingList === null) {
+          console.log('null');
+          localStorage.setItem('list', null);
+          return;
+        }
+        const qwe = Object.keys(shoppingList);
+        const list = [];
+        for (const key of qwe) {
+          list.push(shoppingList[key]);
+        }
+        list.map(el => {
+          const listJson = JSON.stringify(el);
+          localStorage.setItem('list', listJson);
+        });
+      });
+      return root.insertAdjacentHTML('beforeend', userIn(displayName));
+    })
+    .catch(error => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+    });
+}
 
-export function onLogin1() {
+export function onLogOut() {
+  const auth = getAuth();
+  signOut(auth)
+    .then(() => {
+      localStorage.setItem('uid', null);
+      localStorage.setItem('token', null);
+      localStorage.setItem('list', null);
+      return (root.innerHTML = '');
+    })
+    .catch(error => {
+      console.log(error.message);
+    });
+}
+const userIn = displayName =>
+  `<p style="margin: 0; background-color: chartreuse">Welcome, ${displayName}</p>`;
+
+export async function onLogin1() {
   const email = 'PVO@email.com';
   const password = 'mypassword';
   const authSign = getAuth();
   signInWithEmailAndPassword(authSign, email, password)
     .then(userCredential => {
-      // console.log(userCredential.user.displayName);
-      const user = userCredential.user.stsTokenManager.accessToken;
-      uidQ = userCredential.user.uid;
-      const uidJ = JSON.stringify(uidQ);
-      localStorage.setItem('uid', uidJ);
+      userUid = userCredential.user.uid;
+      idToken = userCredential.user.accessToken;
+      const idTokenJson = JSON.stringify(idToken);
+      const uidJson = JSON.stringify(userUid);
+      localStorage.setItem('token', idTokenJson);
+      localStorage.setItem('uid', uidJson);
       const displayName = userCredential.user.displayName;
-      return root.insertAdjacentHTML(
-        'beforeend',
-        `<p style="margin: 0; background-color: chartreuse">Welcome, ${displayName}</p>`
-      );
+      getShoppingList().then(shoppingList => {
+        console.log(shoppingList);
+        if (shoppingList === null) {
+          console.log('null');
+          localStorage.setItem('list', null);
+          return;
+        }
+        // console.log(shoppingList);
+        const qwe = Object.keys(shoppingList);
+        // console.log(qwe);
+        // const keys = Object.key(qwe);
+        const list = [];
+        for (const key of qwe) {
+          list.push(shoppingList[key]);
+          // console.log(list);
+        }
+        list.map(el => {
+          // console.log(el);
+          const listJson = JSON.stringify(el);
+          localStorage.setItem('list', listJson);
+        });
+      });
+      return root.insertAdjacentHTML('beforeend', userIn(displayName));
     })
     .catch(error => {
       const errorCode = error.code;
@@ -85,44 +150,17 @@ export function onLogin2() {
   const authSign = getAuth();
   signInWithEmailAndPassword(authSign, email, password)
     .then(userCredential => {
-      // console.log(userCredential.user.displayName);
-      const user = userCredential.user.stsTokenManager.accessToken;
-      uidQ = userCredential.user.uid;
-      const uidJ = JSON.stringify(uidQ);
-      localStorage.setItem('uid', uidJ);
+      userUid = userCredential.user.uid;
+      idToken = userCredential.user.accessToken;
+      const idTokenJson = JSON.stringify(idToken);
+      const uidJson = JSON.stringify(userUid);
+      localStorage.setItem('token', idTokenJson);
+      localStorage.setItem('uid', uidJson);
       const displayName = userCredential.user.displayName;
-      return root.insertAdjacentHTML(
-        'beforeend',
-        `<p style="margin: 0; background-color: chartreuse">Welcome, ${displayName}</p>`
-      );
+      return root.insertAdjacentHTML('beforeend', userIn(displayName));
     })
     .catch(error => {
       const errorCode = error.code;
       const errorMessage = error.message;
     });
-}
-
-// function onChangeName() {
-//   const auth = getAuth();
-//   updateProfile(auth.currentUser, {
-//   displayName: "Sova"
-//   }).then(() => {
-//   return  root.insertAdjacentHTML('beforeend', `<p>${displayName}</p>`);
-
-//   // Profile updated!
-//   // ...
-// }).catch((error) => {
-//   // An error occurred
-//   // ...
-// });
-// };
-
-export function onLogOut() {
-  const auth = getAuth();
-  signOut(auth)
-    .then(() => {
-      localStorage.setItem('uid', null);
-      return (root.innerHTML = '');
-    })
-    .catch(error => {});
 }
