@@ -139,8 +139,8 @@ export async function onLogin1() {
 }
 
 export function onLogin2() {
-  const email = 'Vsar@email.com';
-  const password = 'mypassword';
+  const email = 'stephen14@mail.com';
+  const password = 'qwerty1';
   const authSign = getAuth();
   signInWithEmailAndPassword(authSign, email, password)
     .then(userCredential => {
@@ -151,6 +151,7 @@ export function onLogin2() {
       localStorage.setItem('token', idTokenJson);
       localStorage.setItem('uid', uidJson);
       const displayName = userCredential.user.displayName;
+      console.log(displayName);
       return root.insertAdjacentHTML('beforeend', userIn(displayName));
     })
     .catch(error => {
