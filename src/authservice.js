@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  updateProfile,
 } from 'firebase/auth';
 import { getShoppingList } from './servisFirebase';
 
@@ -26,22 +27,25 @@ const analytics = getAnalytics(app);
 const root = document.querySelector('.root');
 
 export function createUser(userEmail, userPassword, displayName) {
-  const authCreate = getAuth();
+  const auth = getAuth();
   createUserWithEmailAndPassword(
-    authCreate,
+    auth,
     userEmail,
     userPassword,
     displayName
-  )
-    .then(userCredential => {
-      const userUid = userCredential.user.uid;
-      const idToken = userCredential.user.accessToken;
-      const idTokenJson = JSON.stringify(idToken);
-      const uidJson = JSON.stringify(userUid);
-      localStorage.setItem('token', idTokenJson);
-      localStorage.setItem('uid', uidJson);
-      return root.insertAdjacentHTML('beforeend', userIn(displayName));
-    })
+  ).then(userCredential => {
+    const userUid = userCredential.user.uid;
+    const idToken = userCredential.user.accessToken;
+    const idTokenJson = JSON.stringify(idToken);
+    const uidJson = JSON.stringify(userUid);
+    localStorage.setItem('token', idTokenJson);
+    localStorage.setItem('uid', uidJson);
+    updateProfile(auth.currentUser, {
+      displayName: 'Stephen',
+    });
+  });
+  return root
+    .insertAdjacentHTML('beforeend', userIn(displayName))
     .catch(error => {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -146,12 +150,30 @@ export function onLogin2() {
     .then(userCredential => {
       const userUid = userCredential.user.uid;
       const idToken = userCredential.user.accessToken;
-      const idTokenJson = JSON.stringify(idToken);
-      const uidJson = JSON.stringify(userUid);
-      localStorage.setItem('token', idTokenJson);
-      localStorage.setItem('uid', uidJson);
+      console.log(userCredential);
+
+      // const idTokenJson = JSON.stringify(idToken);
+      // const uidJson = JSON.stringify(userUid);
+      localStorage.setItem('token', JSON.stringify(idToken));
+      localStorage.setItem('uid', JSON.stringify(userUid));
       const displayName = userCredential.user.displayName;
-      console.log(displayName);
+      getShoppingList().then(shoppingList => {
+        console.log(shoppingList);
+        if (shoppingList === null) {
+          console.log('null');
+          localStorage.setItem('list', null);
+          return;
+        }
+        const qwe = Object.keys(shoppingList);
+        const list = [];
+        for (const key of qwe) {
+          list.push(shoppingList[key]);
+        }
+        list.map(el => {
+          const listJson = JSON.stringify(el);
+          localStorage.setItem('list', listJson);
+        });
+      });
       return root.insertAdjacentHTML('beforeend', userIn(displayName));
     })
     .catch(error => {
